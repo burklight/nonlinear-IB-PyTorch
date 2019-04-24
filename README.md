@@ -1,6 +1,6 @@
 # Nonlinear Information Bottleneck (PyTorch)
 
-Implementation of ["Nonlinear Information Bottleneck"](https://arxiv.org/pdf/1705.02436.pdf), Kolchinsky et al. in PyTorch. After talking with Dr. Kolchinsky, only one estimation of the KDE variance is done per epoch.
+Implementation of ["Nonlinear Information Bottleneck"](https://arxiv.org/pdf/1705.02436.pdf), Kolchinsky et al. in PyTorch. After talking with Dr. Kolchinsky, Dr. Tracey and Prof. Wolpert, only one estimation of the KDE variance is done per epoch.
 
 ## Examples
 
