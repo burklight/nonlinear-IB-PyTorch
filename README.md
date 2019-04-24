@@ -6,15 +6,15 @@ Implementation of ["Nonlinear Information Bottleneck"](https://arxiv.org/pdf/170
 
 ### beta = 0 without training sigma
 
-![](./results/figures/K-2-B-0-3-Tr-False-image)
+![](./results/figures/K-2-B-0-0-Tr-False-image.png)
 
 ### beta = 0.2 without training sigma
 
-![](./results/figures/K-2-B-0-2-Tr-True-image)
+![](./results/figures/K-2-B-0-2-Tr-True-image.png)
 
 ### beta = 0.3 training sigma
 
-![](./results/figures/K-2-B-0-3-Tr-False-image)
+![](./results/figures/K-2-B-0-3-Tr-False-image.png)
 
 ## Requirements
 - Pytorch 1.0.1
