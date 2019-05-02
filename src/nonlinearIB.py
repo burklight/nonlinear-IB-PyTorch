@@ -86,7 +86,7 @@ class NonlinearIB(torch.nn.Module):
 
     def fit(self,trainset,validationset,n_epochs=200,learning_rate=0.0001,\
         learning_rate_drop=0.6,learning_rate_steps=10, sgd_batch_size=128,mi_batch_size=1000, \
-        same_batch=True,eval_rate=20,verbose=True,visualization=True,
+        same_batch=True,eval_rate=20,optimizer_name='adam',verbose=True,visualization=True,
         logs_dir='.',figs_dir='.'):
         '''
         Trains the model with the training set and evaluates with the validation one.
@@ -136,14 +136,25 @@ class NonlinearIB(torch.nn.Module):
         if visualization:
             visualization_loader = torch.utils.data.DataLoader(trainset, \
                 batch_size=10000,shuffle=False) # Only for visualization
-            fig, ax = init_results_visualization()
+            fig, ax = init_results_visualization(self.K)
 
         # Prepare name for figures and logs
         name_base = "K-" + str(self.K) + "-B-" + str(round(self.beta,3)).replace('.', '-') \
             + "-Tr-" + str(bool(self.train_logvar_t)) + '-'
 
         # Definition of the optimizer
-        optimizer = torch.optim.Adam(self.network.parameters(),lr=learning_rate)
+        if optimizer_name == 'sgd':
+            optimizer = torch.optim.SGD(self.network.parameters(),lr=learning_rate)
+        elif optimizer_name == 'rmsprop':
+            optimizer = torch.optim.RMSprop(self.network.parameters(),lr=learning_rate)
+        elif optimizer_name == 'adadelta':
+            optimizer = torch.optim.Adadelta(self.network.parameters(),lr=learning_rate)
+        elif optimizer_name == 'adagrad':
+            optimizer = torch.optim.Adagrad(self.network.parameters(),lr=learning_rate)
+        elif optimizer_name == 'adam':
+            optimizer = torch.optim.Adam(self.network.parameters(),lr=learning_rate)
+        elif optimizer_name == 'asgd':
+            optimizer = torch.optim.ASGD(self.network.parameters(),lr=learning_rate)
         learning_rate_scheduler = torch.optim.lr_scheduler.StepLR(optimizer=optimizer, \
             step_size=learning_rate_steps,gamma=learning_rate_drop)
 
@@ -230,15 +241,23 @@ class NonlinearIB(torch.nn.Module):
                 # Visualize results
                 if visualization:
                     with torch.no_grad():
-                        _, (visualize_x,visualize_y) = next(enumerate(validation_loader))
-                        visualize_t = self.network.encode(visualize_x,random=True)
+                        if self.K == 2:
+                            _, (visualize_x,visualize_y) = next(enumerate(validation_loader))
+                            visualize_t = self.network.encode(visualize_x,random=True)
+                        else:
+                            visualize_y, visualize_t = None, None
                         plot_results(train_IXT[:report], validation_IXT[:report],
                             train_ITY[:report], validation_ITY[:report],
                             train_loss[:report], validation_loss[:report],
-                            visualize_t, visualize_y, epochs[:report], self.HY,
+                            visualize_t, visualize_y, epochs[:report], self.HY, self.K,
                             fig, ax)
 
                 # Save results
+                if self.K == 2:
+                    with torch.no_grad():
+                        _, (visualize_x,visualize_y) = next(enumerate(validation_loader))
+                        visualize_t = self.network.encode(visualize_x,random=True)
+                    np.save(logs_dir + name_base + 'hidden_variables', visualize_t)
                 np.save(logs_dir + name_base + 'train_IXT', train_IXT)
                 np.save(logs_dir + name_base + 'validation_IXT', validation_IXT)
                 np.save(logs_dir + name_base + 'train_ITY', train_ITY)

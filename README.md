@@ -6,15 +6,19 @@ Implementation of ["Nonlinear Information Bottleneck"](https://arxiv.org/pdf/170
 
 ### beta = 0 without training sigma
 
-![](./results/figures/K-2-B-0-0-Tr-False-image.png)
+![](./examples/K-2-B-0-0-Tr-False-image.png)
 
 ### beta = 0.2 without training sigma
 
-![](./results/figures/K-2-B-0-2-Tr-True-image.png)
+![](./examples/K-2-B-0-2-Tr-False-image.png)
 
 ### beta = 0.3 training sigma
 
-![](./results/figures/K-2-B-0-3-Tr-False-image.png)
+![](./examples/K-2-B-0-3-Tr-True-image.png)
+
+### Comparison of different betas behavior
+
+![](./examples/K-2-NB-21-Tr-False-behavior.png)
 
 ## Requirements
 - Pytorch 1.0.1
@@ -25,18 +29,22 @@ Implementation of ["Nonlinear Information Bottleneck"](https://arxiv.org/pdf/170
 
 ## Usage
 
+Run either ```python3 train_model.py```or ```python3 study_behavior.py```. The arguments are the following:
+
 ```console
-run.py [-h] [--logs_dir LOGS_DIR] [--figs_dir FIGS_DIR]
-              [--models_dir MODELS_DIR] [--n_epochs N_EPOCHS] [--beta BETA]
-              [--K K] [--logvar_kde LOGVAR_KDE] [--logvar_t LOGVAR_T]
-              [--sgd_batch_size SGD_BATCH_SIZE]
-              [--mi_batch_size MI_BATCH_SIZE] [--same_batch]
-              [--optimizer {sgd,rmsprop,adadelta,adagrad,adam,asgd,sparseadam}]
-              [--learning_rate LEARNING_RATE]
-              [--learning_rate_drop LEARNING_RATE_DROP]
-              [--learning_rate_steps LEARNING_RATE_STEPS] [--train_logvar_t]
-              [--eval_rate EVAL_RATE] [--visualize] [--verbose]
-              
+[-h] [--logs_dir LOGS_DIR] [--figs_dir FIGS_DIR]
+                      [--models_dir MODELS_DIR] [--n_epochs N_EPOCHS]
+                      [--beta BETA] [--n_betas N_BETAS] [--K K]
+                      [--logvar_kde LOGVAR_KDE] [--logvar_t LOGVAR_T]
+                      [--sgd_batch_size SGD_BATCH_SIZE]
+                      [--mi_batch_size MI_BATCH_SIZE] [--same_batch]
+                      [--optimizer_name {sgd,rmsprop,adadelta,adagrad,adam,asgd}]
+                      [--learning_rate LEARNING_RATE]
+                      [--learning_rate_drop LEARNING_RATE_DROP]
+                      [--learning_rate_steps LEARNING_RATE_STEPS]
+                      [--train_logvar_t] [--eval_rate EVAL_RATE] [--visualize]
+                      [--verbose]
+
 Run non-linear IB on MNIST dataset (with Pytorch)
 
 optional arguments:
@@ -48,7 +56,10 @@ optional arguments:
                         folder to save the models (default:
                         ../results/models/)
   --n_epochs N_EPOCHS   number of training epochs (default: 100)
-  --beta BETA           Lagrange multiplier (default: 0.0)
+  --beta BETA           Lagrange multiplier (only for train_model) (default:
+                        0.0)
+  --n_betas N_BETAS     Number of Lagrange multipliers (only for study
+                        behavior) (default: 21)
   --K K                 Dimensionality of the bottleneck varaible (default: 2)
   --logvar_kde LOGVAR_KDE
                         initial log variance of the KDE estimator (default:
@@ -63,7 +74,7 @@ optional arguments:
                         1000)
   --same_batch          use the same mini-batch for the SGD on the error and
                         I(X;T) estimation (default: False)
-  --optimizer {sgd,rmsprop,adadelta,adagrad,adam,asgd,sparseadam}
+  --optimizer_name {sgd,rmsprop,adadelta,adagrad,adam,asgd}
                         optimizer (default: adam)
   --learning_rate LEARNING_RATE
                         initial learning rate (default: 0.0001)

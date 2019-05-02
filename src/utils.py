@@ -55,7 +55,9 @@ def get_args():
     parser.add_argument('--n_epochs', type = int, default = 100,
         help = 'number of training epochs')
     parser.add_argument('--beta', type = float, default = 0.0,
-        help = 'Lagrange multiplier')
+        help = 'Lagrange multiplier (only for train_model)')
+    parser.add_argument('--n_betas', type = int, default = 21,
+        help = 'Number of Lagrange multipliers (only for study behavior)')
     parser.add_argument('--K', type = int, default = 2,
         help = 'Dimensionality of the bottleneck varaible')
     parser.add_argument('--logvar_kde', type = float, default = -1.0,
@@ -68,7 +70,7 @@ def get_args():
         help = 'mini-batch size for the I(X;T) estimation')
     parser.add_argument('--same_batch', action = 'store_true', default = False,
         help = 'use the same mini-batch for the SGD on the error and I(X;T) estimation')
-    parser.add_argument('--optimizer', choices = ['sgd', 'rmsprop', 'adadelta', 'adagrad', 'adam', 'asgd', 'sparseadam'], default = 'adam',
+    parser.add_argument('--optimizer_name', choices = ['sgd', 'rmsprop', 'adadelta', 'adagrad', 'adam', 'asgd'], default = 'adam',
         help = 'optimizer')
     parser.add_argument('--learning_rate', type = float, default = 0.0001,
         help = 'initial learning rate')
