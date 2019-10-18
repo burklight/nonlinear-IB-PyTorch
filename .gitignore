@@ -2,5 +2,5 @@
 ./results 
 # ignore the data 
 ./data
-# ignore all compiled files 
-*.pyc
+# ignore all cache data
+./src/__pycache__
