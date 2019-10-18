@@ -1,8 +1,6 @@
 # ignore all logs 
-./results/logs
-# ignore the pdf files
-./results/figures/*.pdf
-# ignore the models 
-./results/models
-# ignore the MNIST dataset 
+./results 
+# ignore the data 
 ./data
+# ignore all compiled files 
+*.pyc
