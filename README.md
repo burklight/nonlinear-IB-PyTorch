@@ -1,6 +1,6 @@
 # Nonlinear Information Bottleneck (PyTorch)
 
-Implementation of ["Nonlinear Information Bottleneck, 2019"](https://arxiv.org/abs/1705.02436), from Artemy Kolchinsky, Brendan D. Tracey and David H. Wolpert in PyTorch. For a tensorflow implementation, please go to ["Kolchinsky's github"](https://github.com/artemyk/nonlinearIB).
+Implementation of ["Nonlinear Information Bottleneck, 2019"](https://arxiv.org/abs/1705.02436), from Artemy Kolchinsky, Brendan D. Tracey and David H. Wolpert in PyTorch. For a tensorflow implementation, please go to ["Artemy Kolchinsky's github"](https://github.com/artemyk/nonlinearIB).
 
 This repository contains the updated implementation from 2019. To see the original implementation, please go to the `master-old` branch. The highlights of the new version of the Nonlinear-IB are:
 - Consideration of the empirical distribution of the training data instead of a MoG. This frees us from the optimization of the covariances of those matrices.
