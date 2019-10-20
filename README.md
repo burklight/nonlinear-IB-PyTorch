@@ -39,11 +39,14 @@ This repository contains the updated implementation from 2019. To see the origin
 
 ## Requirements
 
-- Pytorch 1.0.1
-- scipy 1.2.1
-- matplotlib 3.0.3
-- progressbar 3.39.3
+The code has been tested on Python 3.6.8 and the following packages. It will probably work with older packages, though.
+
+- torch 1.2.0+cpu
+- torchvision 0.4.0+cpu
+- matplotlib 3.1.1
+- progressbar2 3.43.1
 - scikit-learn 0.21.3
+- numpy 1.17.2
 
 In order to install the requirements you can just write ```pip3 install -r requirements.txt```.
 
