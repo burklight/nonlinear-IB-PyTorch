@@ -3,7 +3,7 @@ import torch
 class Deterministic_encoder(torch.nn.Module):
     '''
     Probabilistic encoder of the network.
-    - We use the one in Kolchinsky et al. 2017 "Nonlinear Information Bottleneck"
+    - We use the one in Kolchinsky et al. 2019 "Nonlinear Information Bottleneck"
     - Parameters:
         · K (int) : dimensionality of the bottleneck variable
         · n_x (int) : dimensionality of the input variable
@@ -13,25 +13,26 @@ class Deterministic_encoder(torch.nn.Module):
         super(Deterministic_encoder,self).__init__()
 
         self.K = K
+        self.n_x = n_x
 
         layers = []
-        layers.append(torch.nn.Linear(n_x,800))
+        layers.append(torch.nn.Linear(n_x,128))
         layers.append(torch.nn.ReLU())
-        layers.append(torch.nn.Linear(800,800))
+        layers.append(torch.nn.Linear(128,128))
         layers.append(torch.nn.ReLU())
-        layers.append(torch.nn.Linear(800,self.K))
+        layers.append(torch.nn.Linear(128,self.K))
         self.f_theta = torch.nn.Sequential(*layers)
 
     def forward(self,x):
 
-        x = x.view(-1,784)
+        x = x.view(-1,self.n_x)
         mean_t = self.f_theta(x)
         return mean_t
 
 class Deterministic_decoder(torch.nn.Module):
     '''
     Deterministic decoder of the network.
-    - We use the one in Kolchinsky et al. 2017 "Nonlinear Information Bottleneck"
+    - We use the one in Kolchinsky et al. 2019 "Nonlinear Information Bottleneck"
     - Parameters:
         · K (int) : dimensionality of the bottleneck variable
         · n_y (int) : dimensionality of the output variable (number of classes)
@@ -43,20 +44,20 @@ class Deterministic_decoder(torch.nn.Module):
         self.K = K
 
         layers = []
-        layers.append(torch.nn.Linear(self.K,800))
+        layers.append(torch.nn.Linear(self.K,128))
         layers.append(torch.nn.ReLU())
-        layers.append(torch.nn.Linear(800,n_y))
+        layers.append(torch.nn.Linear(128,n_y))
         self.g_theta = torch.nn.Sequential(*layers)
 
     def forward(self,t):
 
-        logits_y =  self.g_theta(t)
+        logits_y = self.g_theta(t).squeeze()
         return logits_y
 
 class nlIB_network(torch.nn.Module):
     '''
     Nonlinear Information Bottleneck network.
-    - We use the one in Kolchinsky et al. 2017 "Nonlinear Information Bottleneck"
+    - We use the one in Kolchinsky et al. 2019 "Nonlinear Information Bottleneck"
     - Parameters:
         · K (int) : dimensionality of the bottleneck variable
         · n_x (int) : dimensionality of the input variable

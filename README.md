@@ -1,51 +1,73 @@
 # Nonlinear Information Bottleneck (PyTorch)
 
-Implementation of ["Nonlinear Information Bottleneck"](https://arxiv.org/pdf/1705.02436.pdf), Kolchinsky et al. in PyTorch. After talking with Dr. Kolchinsky, Dr. Tracey and Prof. Wolpert, only one estimation of the KDE variance is done per epoch.
+Implementation of ["Nonlinear Information Bottleneck, 2019"](https://arxiv.org/abs/1705.02436), from Artemy Kolchinsky, Brendan D. Tracey and David H. Wolpert in PyTorch. For a tensorflow implementation, please go to ["Kolchinsky's github"](https://github.com/artemyk/nonlinearIB).
+
+This repository contains the updated implementation from 2019. To see the original implementation, please go to the `master-old` branch. The highlights of the new version of the Nonlinear-IB are:
+- Consideration of the empirical distribution of the training data instead of a MoG. This frees us from the optimization of the covariances of those matrices.
+- Usage of the same batch for both MI estimation and SGD training. This frees memory usage and results in a faster flow of the gradients in the network.
+- Possibility of using the Nonlinear-IB for regression. Here we assume H(Y) is the entropy of a Gaussian with variance var(Y) and H(Y|T) is a Gaussian with entropy the MSE between Y and our estimations.
+- Allow the usage of the power and exponential IB Lagrangians to explore the IB curve from ["The Convex Information Bottleneck Lagrangian, ICLR 2020 (under reveiw)"](https://openreview.net/pdf?id=SkxhS6EYvH) from XXXX. We can use the the squared IB Lagrangian from ["Caveats for information bottleneck in deterministic scenarios, ICLR 2019"](https://openreview.net/pdf?id=rke4HiAcY7) as in the Nonlinear-IB article by using the power IB Lagrangian with parameter equal to 1.
 
 ## Examples
 
-### beta = 0 without training sigma
+### On MNIST
 
-![](./examples/K-2-B-0-0-Tr-False-image.png)
+#### Exponential IB Lagrangian with parameter = 1. Beta = 0.05
 
-### beta = 0.2 without training sigma
+![](./examples/mnist_exp_1_beta_0,05_image.png)
 
-![](./examples/K-2-B-0-2-Tr-False-image.png)
+#### Normal IB Lagrangian. Beta = 0.15
 
-### beta = 0.3 training sigma
+![](./examples/mnist_none_beta_0,15_image.png)
 
-![](./examples/K-2-B-0-3-Tr-True-image.png)
+### On Fashion MNIST
 
-### Comparison of different betas behavior
+#### Power IB Lagrangian with parameter = 1 (or squared IB Lagrangian). Beta = 0.1
 
-![](./examples/K-2-NB-21-Tr-False-behavior.png)
+![](./examples/fashion_pow_1_beta_0,1_image.png)
+
+#### Behavior of the Exponential IB Lagrangian with parameter = 1.
+
+![](./examples/fashion_exp_1_behavior_image.png)
+
+### On California Housing 
+
+#### Normal IB Lagrangian. Beta = 0.01
+
+![](./examples/housing_none_beta_0,01_image.png)
+
 
 ## Requirements
+
 - Pytorch 1.0.1
-- autograd 1.2
 - scipy 1.2.1
 - matplotlib 3.0.3
 - progressbar 3.39.3
+- scikit-learn 0.21.3
+
+In order to install the requirements you can just write ```pip3 install -r requirements.txt```.
 
 ## Usage
 
-Run either ```python3 train_model.py```or ```python3 study_behavior.py```. The arguments are the following:
+Run either ```python3 train_model.py```or ```python3 study_behavior.py``` in the `src` directory. The arguments are the following:
 
 ```console
 [-h] [--logs_dir LOGS_DIR] [--figs_dir FIGS_DIR]
-                      [--models_dir MODELS_DIR] [--n_epochs N_EPOCHS]
-                      [--beta BETA] [--n_betas N_BETAS] [--K K]
-                      [--logvar_kde LOGVAR_KDE] [--logvar_t LOGVAR_T]
-                      [--sgd_batch_size SGD_BATCH_SIZE]
-                      [--mi_batch_size MI_BATCH_SIZE] [--same_batch]
-                      [--optimizer_name {sgd,rmsprop,adadelta,adagrad,adam,asgd}]
-                      [--learning_rate LEARNING_RATE]
-                      [--learning_rate_drop LEARNING_RATE_DROP]
-                      [--learning_rate_steps LEARNING_RATE_STEPS]
-                      [--train_logvar_t] [--eval_rate EVAL_RATE] [--visualize]
-                      [--verbose]
+    [--models_dir MODELS_DIR] [--n_epochs N_EPOCHS]
+    [--beta BETA] [--beta_lim_min BETA_LIM_MIN]
+    [--beta_lim_max BETA_LIM_MAX] [--hfunc {exp,pow,none}]
+    [--hfunc_param HFUNC_PARAM] [--n_betas N_BETAS] [--K K]
+    [--logvar_t LOGVAR_T] [--sgd_batch_size SGD_BATCH_SIZE]
+    [--early_stopping_lim EARLY_STOPPING_LIM]
+    [--dataset {mnist,fashion_mnist,california_housing}]
+    [--optimizer_name {sgd,rmsprop,adadelta,adagrad,adam,asgd}]
+    [--learning_rate LEARNING_RATE]
+    [--learning_rate_drop LEARNING_RATE_DROP]
+    [--learning_rate_steps LEARNING_RATE_STEPS]
+    [--train_logvar_t] [--eval_rate EVAL_RATE] [--visualize]
+    [--verbose]
 
-Run non-linear IB on MNIST dataset (with Pytorch)
+Run nonlinear IB (with Pytorch)
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -58,26 +80,35 @@ optional arguments:
   --n_epochs N_EPOCHS   number of training epochs (default: 100)
   --beta BETA           Lagrange multiplier (only for train_model) (default:
                         0.0)
+  --beta_lim_min BETA_LIM_MIN
+                        minimum value of beta for the study of the behavior
+                        (default: 0.0)
+  --beta_lim_max BETA_LIM_MAX
+                        maximum value of beta for the study of the behavior
+                        (default: 1.0)
+  --hfunc {exp,pow,none}
+                        Monotonically increasing, strictly convex function for
+                        the Lagrangian (default: exp)
+  --hfunc_param HFUNC_PARAM
+                        Parameter of the h function (default: 1.0)
   --n_betas N_BETAS     Number of Lagrange multipliers (only for study
                         behavior) (default: 21)
   --K K                 Dimensionality of the bottleneck varaible (default: 2)
-  --logvar_kde LOGVAR_KDE
-                        initial log variance of the KDE estimator (default:
-                        -1.0)
   --logvar_t LOGVAR_T   initial log varaince of the bottleneck variable
-                        (default: -1.0)
+                        (default: 0.0)
   --sgd_batch_size SGD_BATCH_SIZE
                         mini-batch size for the SGD on the error (default:
-                        128)
-  --mi_batch_size MI_BATCH_SIZE
-                        mini-batch size for the I(X;T) estimation (default:
-                        1000)
-  --same_batch          use the same mini-batch for the SGD on the error and
-                        I(X;T) estimation (default: False)
+                        256)
+  --early_stopping_lim EARLY_STOPPING_LIM
+                        early stopping limit for non improvement (default: 20)
+  --dataset {mnist,fashion_mnist,california_housing}
+                        dataset where to run the experiments. Classification:
+                        MNIST or Fashion MNIST. Regression: California
+                        housing. (default: mnist)
   --optimizer_name {sgd,rmsprop,adadelta,adagrad,adam,asgd}
                         optimizer (default: adam)
   --learning_rate LEARNING_RATE
-                        initial learning rate (default: 0.0001)
+                        initial learning rate (default: 0.001)
   --learning_rate_drop LEARNING_RATE_DROP
                         learning rate decay rate (step LR every
                         learning_rate_steps) (default: 0.6)
@@ -93,6 +124,4 @@ optional arguments:
                         False)
   --verbose             report the results every eval_rate epochs (default:
                         False)
-
 ```
-
