@@ -5,7 +5,7 @@ Implementation of ["Nonlinear Information Bottleneck, 2019"](https://arxiv.org/a
 This repository contains the updated implementation from 2019. To see the original implementation, please go to the `master-old` branch. The highlights of the new version of the Nonlinear-IB are:
 - Consideration of the empirical distribution of the training data instead of a MoG. This frees us from the optimization of the covariances of those matrices.
 - Usage of the same batch for both MI estimation and SGD training. This frees memory usage and results in a faster flow of the gradients in the network.
-- Possibility of using the Nonlinear-IB for regression. Here we assume H(Y) is the entropy of a Gaussian with variance var(Y) and H(Y|T) is a Gaussian with entropy the MSE between Y and our estimations.
+- Possibility of using the Nonlinear-IB for regression. Here we assume H(Y) is the entropy of a Gaussian with variance var(Y) and H(Y|T) is the entropy of a Gaussian with variance the MSE between Y and our estimations.
 - Allow the usage of the power and exponential IB Lagrangians to explore the IB curve from ["The Convex Information Bottleneck Lagrangian, ICLR 2020 (under reveiw)"](https://openreview.net/pdf?id=SkxhS6EYvH) from XXXX. We can use the the squared IB Lagrangian from ["Caveats for information bottleneck in deterministic scenarios, ICLR 2019"](https://openreview.net/pdf?id=rke4HiAcY7) as in the Nonlinear-IB article by using the power IB Lagrangian with parameter equal to 1.
 
 ## Examples
