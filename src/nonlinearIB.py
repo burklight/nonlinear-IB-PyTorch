@@ -218,63 +218,10 @@ class NonlinearIB(torch.nn.Module):
                 loss = self.get_loss(train_IXT,train_ITY)
                 loss.backward()
                 optimizer.step()
-
+            
             # Update learning rate
-            #learning_rate_scheduler.step()
-
-            # Report results
-            if epoch % eval_rate == 0:
-                with torch.no_grad():
-                    epochs_vec[report] = epoch
-
-                    train_IXT_vec[report], train_ITY_vec[report], train_loss_vec[report], train_performance_vec[report] = \
-                        self.evaluate_network(train_loader,n_sgd_batches)
-                    test_IXT_vec[report], test_ITY_vec[report], test_loss_vec[report], test_performance_vec[report] = \
-                        self.evaluate_network(test_loader,1)
-
-                if verbose:
-                    print('\n\n** Results report **')
-                    print(f'- Train | Test I(X;T) = {train_IXT_vec[report]} | {test_IXT_vec[report]}')
-                    print(f'- Train | Test I(T;Y) = {train_ITY_vec[report]} | {test_ITY_vec[report]}')
-                    if self.problem_type == 'classification':
-                        print(f'- Train | Test accuracy = {train_performance_vec[report]} | {test_performance_vec[report]}\n')
-                    else:
-                        print(f'- Train | Test MSE = {train_performance_vec[report]} | {test_performance_vec[report]}\n')
-
-                report += 1
-
-                # Visualize results and save results
-                if visualization:
-                    with torch.no_grad():
-                        _, (visualize_x,visualize_y) = next(enumerate(test_loader))
-                        visualize_t = self.network.encode(visualize_x[:n_points],random=False)
-                        
-                        plot_results(train_IXT_vec[:report], test_IXT_vec[:report],
-                            train_ITY_vec[:report], test_ITY_vec[:report],
-                            train_loss_vec[:report], test_loss_vec[:report],
-                            pca.fit_transform(visualize_t), visualize_y[:n_points], epochs_vec[:report], self.HY, self.K,
-                            fig, ax, self.problem_type)
-                        
-                        plt.savefig(figs_dir + name_base + '--image.pdf', format = 'pdf')
-                        plt.savefig(figs_dir + name_base + '--image.png', format = 'png')
-
-                        print('The image is updated at ' + figs_dir + name_base + '--image.png')
-
-                        np.save(logs_dir + name_base + '--hidden_variables', visualize_t)
-                        np.save(logs_dir + name_base + '--labels', visualize_y)
-                
-                # Save the other results
-                with torch.no_grad():
-                    np.save(logs_dir + name_base + '--train_IXT', train_IXT_vec[:report])
-                    np.save(logs_dir + name_base + '--validation_IXT', test_IXT_vec[:report])
-                    np.save(logs_dir + name_base + '--train_ITY', train_ITY_vec[:report])
-                    np.save(logs_dir + name_base + '--validation_ITY', test_ITY_vec[:report])
-                    np.save(logs_dir + name_base + '--train_loss', train_loss_vec[:report])
-                    np.save(logs_dir + name_base + '--validation_loss', test_loss_vec[:report])
-                    np.save(logs_dir + name_base + '--train_performance', train_performance_vec[:report])
-                    np.save(logs_dir + name_base + '--validation_performance', test_performance_vec[:report])
-                    np.save(logs_dir + name_base + '--epochs', epochs_vec)
-                
+            learning_rate_scheduler.step()
+            
             # Check for early stopping 
             with torch.no_grad():
                 _,_,loss_curr,_ = self.evaluate_network(validation_loader,1)
@@ -284,5 +231,60 @@ class NonlinearIB(torch.nn.Module):
                     early_stopping_count = 0
                 if early_stopping_count >= early_stopping_lim:
                     break
+            
+            # If the results are improving
+            if early_stopping_count == 0:
+                # Report results
+                if epoch % eval_rate == 0:
+                    with torch.no_grad():
+                        epochs_vec[report] = epoch
+
+                        train_IXT_vec[report], train_ITY_vec[report], train_loss_vec[report], train_performance_vec[report] = \
+                            self.evaluate_network(train_loader,n_sgd_batches)
+                        test_IXT_vec[report], test_ITY_vec[report], test_loss_vec[report], test_performance_vec[report] = \
+                            self.evaluate_network(test_loader,1)
+
+                    if verbose:
+                        print('\n\n** Results report **')
+                        print(f'- Train | Test I(X;T) = {train_IXT_vec[report]} | {test_IXT_vec[report]}')
+                        print(f'- Train | Test I(T;Y) = {train_ITY_vec[report]} | {test_ITY_vec[report]}')
+                        if self.problem_type == 'classification':
+                            print(f'- Train | Test accuracy = {train_performance_vec[report]} | {test_performance_vec[report]}\n')
+                        else:
+                            print(f'- Train | Test MSE = {train_performance_vec[report]} | {test_performance_vec[report]}\n')
+
+                    report += 1
+
+                    # Visualize results and save results
+                    if visualization:
+                        with torch.no_grad():
+                            _, (visualize_x,visualize_y) = next(enumerate(test_loader))
+                            visualize_t = self.network.encode(visualize_x[:n_points],random=False)
+                            
+                            plot_results(train_IXT_vec[:report], test_IXT_vec[:report],
+                                train_ITY_vec[:report], test_ITY_vec[:report],
+                                train_loss_vec[:report], test_loss_vec[:report],
+                                pca.fit_transform(visualize_t), visualize_y[:n_points], epochs_vec[:report], self.HY, self.K,
+                                fig, ax, self.problem_type)
+                            
+                            plt.savefig(figs_dir + name_base + '--image.pdf', format = 'pdf')
+                            plt.savefig(figs_dir + name_base + '--image.png', format = 'png')
+
+                            print('The image is updated at ' + figs_dir + name_base + '--image.png')
+
+                            np.save(logs_dir + name_base + '--hidden_variables', visualize_t)
+                            np.save(logs_dir + name_base + '--labels', visualize_y)
+                    
+                    # Save the other results
+                    with torch.no_grad():
+                        np.save(logs_dir + name_base + '--train_IXT', train_IXT_vec[:report])
+                        np.save(logs_dir + name_base + '--validation_IXT', test_IXT_vec[:report])
+                        np.save(logs_dir + name_base + '--train_ITY', train_ITY_vec[:report])
+                        np.save(logs_dir + name_base + '--validation_ITY', test_ITY_vec[:report])
+                        np.save(logs_dir + name_base + '--train_loss', train_loss_vec[:report])
+                        np.save(logs_dir + name_base + '--validation_loss', test_loss_vec[:report])
+                        np.save(logs_dir + name_base + '--train_performance', train_performance_vec[:report])
+                        np.save(logs_dir + name_base + '--validation_performance', test_performance_vec[:report])
+                        np.save(logs_dir + name_base + '--epochs', epochs_vec[:report])
 
 

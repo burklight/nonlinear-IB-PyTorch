@@ -1,7 +1,6 @@
 import torch
 import math
 import numpy as np
-import scipy.special
 
 ################################################################################
 ## KDE estimation of the information (PyTorch)

@@ -65,12 +65,12 @@ def plot_results(IXT_train, IXT_validation, ITY_train, ITY_validation,
     npoints = 10000
     ax[3].clear()
     if problem_type == 'classification':
-        ax[3].scatter(t[0:npoints,0], t[0:npoints,1], c=y[0:npoints], cmap='tab10', marker='.', alpha=0.1)
+        ax[3].scatter(t[0:npoints,0], t[0:npoints,1], c=y[0:npoints], cmap='tab10', marker='.', s=0.005)
     else:
-        ax[3].scatter(t[0:npoints,0], t[0:npoints,1], c=y[0:npoints], cmap='seismic', marker='.', alpha=0.1)
-        m, vm = t.mean(0), t.var(0).max()
-        ax[3].set_xlim([m[0]-0.75*vm,m[0]+0.75*vm])
-        ax[3].set_ylim([m[1]-0.75*vm,m[1]+0.75*vm])
+        ax[3].scatter(t[0:npoints,0], t[0:npoints,1], c=y[0:npoints], cmap='seismic', marker='.', s=0.05)
+        m, sd = np.median(t,0) , np.std(t,0)
+        ax[3].set_xlim([m[0]-2.5*sd[0],m[0]+2.5*sd[0]])
+        ax[3].set_ylim([m[1]-2.5*sd[1],m[1]+2.5*sd[1]])
     ax[3].set_xticks([])
     ax[3].set_yticks([])
     ax[3].set_xlabel('Bottleneck variable space')
