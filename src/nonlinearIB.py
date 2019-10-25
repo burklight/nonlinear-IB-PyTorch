@@ -62,21 +62,23 @@ class NonlinearIB(torch.nn.Module):
 
         if self.problem_type == 'classification':
             HY_given_T = self.ce(logits_y,y)
-            self.ITY = (self.HY - HY_given_T) / np.log(2) # in bits
+            ITY = (self.HY - HY_given_T) / np.log(2) # in bits
+            return ITY
         else:
             MSE = self.mse(logits_y,y)
-            self.ITY = 0.5 * torch.log(self.varY / MSE) / np.log(2) # in bits
-        return self.ITY
+            ITY = 0.5 * torch.log(self.varY / MSE) / np.log(2) # in bits
+            return ITY, (self.HY - (0.5*(math.log(2*math.pi) + MSE))) / np.log(2)
+        
     
-    def get_loss(self,IXT,ITY):
+    def get_loss(self,IXT_upper,ITY_lower):
         '''
         Returns the loss function from the XXXX et al. 2019, "The Convex Information Bottleneck Lagrangian"
         Paramters: 
-        - IXT (float) : Mutual information between X and T
-        - ITY (float) : Mutual information between T and Y 
+        - IXT (float) : Mutual information between X and T upper bound
+        - ITY (float) : Mutual information between T and Y lower bound
         '''
         
-        loss = -1.0 * (ITY - self.beta * self.hfunc(IXT))
+        loss = -1.0 * (ITY_lower - self.beta * self.hfunc(IXT_upper))
         return loss
 
     def evaluate(self,logits_y,y):
@@ -100,9 +102,20 @@ class NonlinearIB(torch.nn.Module):
 
         logits_y = self.network(x)
         mean_t = self.network.encode(x,random=False)
-        IXT += self.get_IXT(mean_t) / n_batches
-        ITY += self.get_ITY(logits_y,y) / n_batches
-        loss += self.get_loss(IXT,ITY) / n_batches
+        IXT_t = self.get_IXT(mean_t) / n_batches 
+        if self.problem_type == 'classification':
+            ITY_t = self.get_ITY(logits_y,y) / n_batches
+            loss_t = self.get_loss(IXT_t,ITY_t) / n_batches
+        else:
+            ITY_t, ITY_lower_t = self.get_ITY(logits_y,y) 
+            ITY_t /= n_batches
+            ITY_lower_t /= ITY_lower_t
+            loss_t = self.get_loss(IXT_t,ITY_lower_t) / n_batches 
+        
+        IXT += IXT_t
+        ITY += ITY_t 
+        loss += loss_t         
+
         performance += self.evaluate(logits_y,y) / n_batches
 
         return IXT, ITY, loss, performance
@@ -212,10 +225,16 @@ class NonlinearIB(torch.nn.Module):
                 # - Gradient descent
                 optimizer.zero_grad()
                 train_logits_y = self.network(train_x)
-                train_ITY = self.get_ITY(train_logits_y,train_y)
+                if self.problem_type == 'classification':
+                    train_ITY = self.get_ITY(train_logits_y,train_y)
+                else:
+                    train_ITY, train_ITY_lower = self.get_ITY(train_logits_y,train_y)
                 train_mean_t = self.network.encode(train_x,random=False)
                 train_IXT = self.get_IXT(train_mean_t)
-                loss = self.get_loss(train_IXT,train_ITY)
+                if self.problem_type == 'classification':
+                    loss = self.get_loss(train_IXT,train_ITY)
+                else:
+                    loss = self.get_loss(train_IXT,train_ITY_lower)
                 loss.backward()
                 optimizer.step()
             
