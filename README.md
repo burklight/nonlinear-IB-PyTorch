@@ -32,7 +32,7 @@ This repository contains the updated implementation from 2019. To see the origin
 
 ### On California Housing 
 
-#### Exponential IB Lagrangian with parameter 0.3. Beta = 0.005
+#### Exponential IB Lagrangian with parameter 3. Beta = 0.005
 
 ![](./examples/housing_exp_0,3_beta_0,05_image.png)
 
