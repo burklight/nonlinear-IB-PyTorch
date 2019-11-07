@@ -67,7 +67,7 @@ class NonlinearIB(torch.nn.Module):
         else:
             MSE = self.mse(logits_y,y)
             ITY = 0.5 * torch.log(self.varY / MSE) / np.log(2) # in bits
-            return ITY, (self.HY - (0.5*(math.log(2*math.pi) + MSE))) / np.log(2)
+            return ITY , self.HY - MSE
         
     
     def get_loss(self,IXT_upper,ITY_lower):

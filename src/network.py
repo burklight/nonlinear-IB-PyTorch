@@ -83,6 +83,9 @@ class nlIB_network(torch.nn.Module):
         else:
             t = mean_t
         return t
+    
+    def apply_noise(self,mean_t):
+        return mean_t + torch.exp(0.5*self.logvar_t) * torch.randn_like(mean_t)
 
     def decode(self,t):
 

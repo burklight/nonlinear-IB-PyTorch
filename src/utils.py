@@ -6,6 +6,7 @@ import argparse
 import PIL.Image
 import sklearn.datasets
 import random
+import numpy as np
 
 def weight_init(m):
     '''
@@ -110,13 +111,14 @@ def get_california_housing(percentage_validation=0.2,percentage_test=0.2):
     
     # We remove the houses with prices higher than 500,000 dollars
     idx_drop = Y >= 5
-    X, Y = X[~idx_drop], Y[~idx_drop]
+    X, Y = X[~idx_drop], np.log(Y[~idx_drop])
 
     # We shuffle the inputs and outputs before assigning train/val/test 
     tmp = list(zip(X,Y))
     random.shuffle(tmp)
     X, Y = zip(*tmp)
     X, Y = torch.FloatTensor(X), torch.FloatTensor(Y)
+    X = (X - torch.mean(X,0)) / torch.std(X,0)
 
     # Split between training / validation / testing
     splitpoint_test = int(len(Y) * (1.0 - percentage_test))
@@ -130,7 +132,6 @@ def get_california_housing(percentage_validation=0.2,percentage_test=0.2):
     validationset = DatasetRegression(X_validation,Y_validation)
     testset = DatasetRegression(X_test,Y_test)
     return trainset,validationset, testset
-
 
 def get_data(dataset='mnist',percentage_validation=0.2):
     '''

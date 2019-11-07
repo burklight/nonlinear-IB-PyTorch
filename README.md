@@ -36,6 +36,10 @@ This repository contains the updated implementation from 2019. To see the origin
 
 ![](./examples/housing_exp_0,3_beta_0,05_image.png)
 
+#### Behavior of the Exponential IB Lagrangian with parameter 1.
+
+![](./examples/housing_exp_1_behavior_image.png)
+
 
 ## Requirements
 
