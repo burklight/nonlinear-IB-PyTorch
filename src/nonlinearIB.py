@@ -18,6 +18,7 @@ class NonlinearIB(torch.nn.Module):
         super(NonlinearIB,self).__init__()
 
         self.HY = np.log(n_y) # in natts
+        self.maxIXY = self.HY # in natts
         self.varY = 0 # to be updated with the training dataset
 
         self.K = K
@@ -178,6 +179,9 @@ class NonlinearIB(torch.nn.Module):
         if self.problem_type == 'regression':
             self.varY = torch.var(trainset.targets)
             self.HY = 0.5 * math.log(self.varY.item()*2.0*math.pi*math.e) # in natts
+            self.maxIXY = 0.72785 # approximation for California Housing (just train with beta = 0 and get the value of I(T;Y) after training)
+                                  # only for visualization purposes
+
 
         # Data Loader
         n_sgd_batches = math.floor(len(trainset) / sgd_batch_size)
@@ -283,7 +287,7 @@ class NonlinearIB(torch.nn.Module):
                             plot_results(train_IXT_vec[:report], test_IXT_vec[:report],
                                 train_ITY_vec[:report], test_ITY_vec[:report],
                                 train_loss_vec[:report], test_loss_vec[:report],
-                                pca.fit_transform(visualize_t), visualize_y[:n_points], epochs_vec[:report], self.HY, self.K,
+                                pca.fit_transform(visualize_t), visualize_y[:n_points], epochs_vec[:report], self.maxIXY, self.K,
                                 fig, ax, self.problem_type)
                             
                             plt.savefig(figs_dir + name_base + '--image.pdf', format = 'pdf')

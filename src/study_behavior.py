@@ -21,12 +21,14 @@ if dataset_name == 'mnist' or dataset_name == 'fashion_mnist':
     n_x = 784
     n_y = 10
     HY = np.log2(n_y)
+    maxIXY = HY
     problem_type = 'classification'
 elif dataset_name == 'california_housing':
     n_x = 8
     n_y = 1
     varY = torch.var(trainset.targets)
     HY = 0.5 * math.log(varY.item()*2.0*math.pi*math.e) / np.log(2)
+    maxIXY = 0.72785 / np.log(2) # Estimation by training with only the cross entropy and getting the result after training
     problem_type = 'regression'
 
 # Create the folders
@@ -63,4 +65,4 @@ with multiprocessing.Pool(4) as p:
     p.map(train_and_save, betas)
 
 # Visualize the comparison
-plot_behavior(logs_dir,figs_dir,args.K,betas,args.hfunc,args.hfunc_param,HY)
+plot_behavior(logs_dir,figs_dir,args.K,betas,args.hfunc,args.hfunc_param,maxIXY)
